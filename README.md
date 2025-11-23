@@ -1,6 +1,6 @@
 # ENIGMA
 
-Recriando a máquina de criptografia Enigma (**EM ANDAMENTO**)
+Recriando a máquina de criptografia Enigma 
 
 Este projeto tem como objetivo recriar a famosa máquina de criptografia alemã, a Enigma, utilizando **JavaScript** e **HTML**. A ideia é proporcionar uma experiência interativa e de fácil visualização para o usuário, permitindo que ele compreenda o funcionamento básico da máquina que foi amplamente utilizada durante a Segunda Guerra Mundial.
 
