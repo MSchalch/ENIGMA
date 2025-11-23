@@ -1,0 +1,145 @@
+:root {
+    --raio: 220px;
+    --cambridge-blue: #83b692;
+    --dark-moss-green: #3e5622;
+    --burnt-orange: #ba5c12;
+    --pale-dogwood: #f2d1c9;
+    --drab-dark-brown: #474a2c;
+    --bg-main: #f4f4f4;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: var(--cambridge-blue);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    width: 95%;
+    max-width: 1250px; /* Aumentei um pouco para caber o padding extra */
+    
+    /* ALTERAÇÃO AQUI: Espaçamento interno */
+    padding: 40px; 
+    padding-right: 80px; /* Espaço extra na direita para o círculo não colar na borda */
+    
+    background-color: var(--pale-dogwood);
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* --- PAINEL ESQUERDO --- */
+.painel-esquerdo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 450px;
+}
+
+.rotores-container {
+    background-color: rgba(255,255,255,0.5);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.rotores { display: flex; gap: 15px; }
+
+.input-rotor {
+    width: 60px; height: 60px; border-radius: 8px;
+    border: 2px solid var(--drab-dark-brown);
+    background-color: var(--cambridge-blue); color: white;
+    text-align: center; font-size: 24px; font-weight: bold; outline: none;
+}
+
+.io-container {
+    display: flex; flex-direction: column; gap: 8px;
+}
+
+.displayMsg {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid var(--drab-dark-brown);
+    text-transform: uppercase;
+    outline: none;
+    resize: none;
+    font-family: monospace;
+}
+
+label { font-weight: bold; color: var(--drab-dark-brown); }
+
+button {
+    cursor: pointer; border: none; border-radius: 8px;
+    font-weight: bold; transition: filter 0.2s;
+}
+button:hover { filter: brightness(1.1); }
+
+.button-action { background-color: var(--burnt-orange); color: white; padding: 15px; font-size: 18px; }
+.button-reset { background-color: var(--drab-dark-brown); color: white; padding: 8px 15px; }
+.button-secondary { background-color: var(--dark-moss-green); color: white; padding: 10px; }
+
+/* --- PAINEL DIREITO --- */
+.painel-direito {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circle-container {
+    position: relative;
+    width: 550px; height: 550px;
+    flex-shrink: 0; 
+}
+
+.square {
+    position: absolute; width: 38px; height: 38px;
+    background-color: var(--dark-moss-green); color: white;
+    font-weight: bold; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none; cursor: pointer;
+    top: 50%; left: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    z-index: 2; transition: transform 0.2s;
+}
+.square:hover { transform: translate(-50%, -50%) scale(1.2); }
+
+/* CLASSE QUE MUDA A COR QUANDO CONECTADO */
+.square.connected { background-color: var(--burnt-orange); }
+
+line { pointer-events: stroke; }
+
+/* RESPONSIVIDADE */
+@media (max-width: 1000px) {
+    body { align-items: flex-start; padding: 20px 0; }
+    .main-content {
+        flex-direction: column; align-items: center;
+        width: 95%; padding: 20px; gap: 20px;
+    }
+    .painel-esquerdo { max-width: 100%; width: 100%; }
+    .circle-container {
+        width: 350px; height: 350px;
+        transform: scale(0.8);
+        margin-top: -20px;
+    }
+}

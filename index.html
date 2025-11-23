@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>ENIGMA - Horizontal</title>
+</head>
+<body>
+    <main class="main-content">
+        <section class="painel-esquerdo">
+            <div class="rotores-container">
+                <label>Rotores:</label>
+                <div class="rotores">
+                    <input type="number" id="posicaoRotor1" class="input-rotor" value="0" maxlength="2">
+                    <input type="number" id="posicaoRotor2" class="input-rotor" value="0" maxlength="2">
+                    <input type="number" id="posicaoRotor3" class="input-rotor" value="0" maxlength="2">
+                </div>
+                <button class="button-reset" onclick="reutilizarRotores()">Voltar Posição dos Rotores</button>
+            </div>
+
+            <div class="io-container">
+                <label>Mensagem Original:</label>
+                <textarea id="msgOriginal" class="displayMsg" placeholder="DIGITE A MENSAGEM AQUI..."></textarea>
+                <button class="button-action" onclick="criptografarMsg()">Processar Mensagem</button>
+            </div>
+
+            <div class="io-container">
+                <label>Resultado:</label>
+                <textarea id="msgCriptografada" class="displayMsg" placeholder="RESULTADO..." readonly></textarea>
+                <button class="button-secondary" onclick="msgCriptografadoNaEntrada()">Usar saída como entrada</button>
+            </div>
+        </section>
+
+        <section class="painel-direito">
+            <div class="circle-container" id="circle">
+                <svg id="svg-linhas" width="100%" height="100%" style="position:absolute; top:0; left:0; z-index:0;"></svg>
+                </div>
+        </section>
+    </main>
+    
+    <script src="app.js"></script>
+</body>
+</html>
