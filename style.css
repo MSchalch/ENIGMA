@@ -11,7 +11,14 @@
 * {
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Previne seleção de texto acidental no celular ao arrastar */
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+    user-select: none;
 }
+
+/* Permite seleção apenas nos inputs */
+input, textarea { user-select: text; -webkit-user-select: text; }
 
 body, html {
     min-height: 100vh;
@@ -30,18 +37,14 @@ body, html {
     align-items: center;
     gap: 40px;
     width: 95%;
-    max-width: 1250px; /* Aumentei um pouco para caber o padding extra */
-    
-    /* ALTERAÇÃO AQUI: Espaçamento interno */
+    max-width: 1250px;
     padding: 40px; 
-    padding-right: 80px; /* Espaço extra na direita para o círculo não colar na borda */
-    
+    padding-right: 80px;
     background-color: var(--pale-dogwood);
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* --- PAINEL ESQUERDO --- */
 .painel-esquerdo {
     flex: 1;
     display: flex;
@@ -69,9 +72,7 @@ body, html {
     text-align: center; font-size: 24px; font-weight: bold; outline: none;
 }
 
-.io-container {
-    display: flex; flex-direction: column; gap: 8px;
-}
+.io-container { display: flex; flex-direction: column; gap: 8px; }
 
 .displayMsg {
     width: 100%;
@@ -92,15 +93,24 @@ button {
     cursor: pointer; border: none; border-radius: 8px;
     font-weight: bold; transition: filter 0.2s;
 }
-button:hover { filter: brightness(1.1); }
+button:active { transform: scale(0.98); } /* Feedback visual de toque */
 
 .button-action { background-color: var(--burnt-orange); color: white; padding: 15px; font-size: 18px; }
 .button-reset { background-color: var(--drab-dark-brown); color: white; padding: 8px 15px; }
 .button-secondary { background-color: var(--dark-moss-green); color: white; padding: 10px; }
 
-/* --- PAINEL DIREITO --- */
 .painel-direito {
     flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Wrapper para centralizar o scale */
+.circle-wrapper {
+    width: 550px; 
+    height: 550px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -108,8 +118,9 @@ button:hover { filter: brightness(1.1); }
 
 .circle-container {
     position: relative;
-    width: 550px; height: 550px;
+    width: 550px; height: 550px; /* Tamanho fixo original para a matemática do JS funcionar */
     flex-shrink: 0; 
+    transform-origin: center center;
 }
 
 .square {
@@ -117,29 +128,61 @@ button:hover { filter: brightness(1.1); }
     background-color: var(--dark-moss-green); color: white;
     font-weight: bold; border-radius: 50%;
     display: flex; justify-content: center; align-items: center;
-    user-select: none; cursor: pointer;
+    cursor: pointer;
     top: 50%; left: 50%;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    z-index: 2; transition: transform 0.2s;
+    z-index: 10; /* Garante que fique acima da linha */
+    transition: transform 0.1s;
 }
-.square:hover { transform: translate(-50%, -50%) scale(1.2); }
 
-/* CLASSE QUE MUDA A COR QUANDO CONECTADO */
+.square:hover, .square:active { transform: translate(-50%, -50%) scale(1.2); }
 .square.connected { background-color: var(--burnt-orange); }
 
 line { pointer-events: stroke; }
 
-/* RESPONSIVIDADE */
+/* --- VERSÃO MOBILE --- */
 @media (max-width: 1000px) {
-    body { align-items: flex-start; padding: 20px 0; }
+    body { 
+        align-items: flex-start; /* Permite scroll */
+        padding: 0;
+        background-color: var(--pale-dogwood); /* Fundo unificado no mobile */
+    }
+
     .main-content {
-        flex-direction: column; align-items: center;
-        width: 95%; padding: 20px; gap: 20px;
+        flex-direction: column; /* Vertical */
+        width: 100%;
+        max-width: 100%;
+        padding: 20px 15px;
+        gap: 30px;
+        box-shadow: none;
+        border-radius: 0;
+        padding-right: 15px; /* Reseta o padding extra do desktop */
     }
-    .painel-esquerdo { max-width: 100%; width: 100%; }
+
+    .painel-esquerdo {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .painel-direito {
+        width: 100%;
+        overflow: hidden; /* Evita scroll horizontal se o scale falhar */
+        margin-bottom: 50px; /* Espaço extra no final */
+    }
+
+    .circle-wrapper {
+        width: 100%; /* O wrapper ocupa a largura da tela */
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
     .circle-container {
-        width: 350px; height: 350px;
-        transform: scale(0.8);
-        margin-top: -20px;
+        /* TRUQUE DE MESTRE: */
+        /* Mantém 550px internamente, mas escala para caber na tela do celular */
+        /* Se a tela for 350px, ele faz scale(0.63) automaticamente */
+        transform: scale(calc((100vw - 40px) / 550));
     }
+    
+    /* Aumenta área de toque das linhas no mobile */
+    line { stroke-width: 8 !important; }
 }

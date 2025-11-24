@@ -129,17 +129,27 @@ function desenharLinha(char1, char2) {
     const rect2 = square2.getBoundingClientRect();
     const svg = document.getElementById('svg-linhas');
     const svgRect = svg.getBoundingClientRect();
+    
+    // Calcula as coordenadas considerando o SVG como referência
+    // O getBoundingClientRect já considera a escala (transform: scale)
+    const x1 = (rect1.left + rect1.width/2 - svgRect.left) * (svg.viewBox.baseVal.width ? 1 : 1); // Simplificado pois SVG é 1:1
+    const y1 = rect1.top + rect1.height/2 - svgRect.top;
+    const x2 = rect2.left + rect2.width/2 - svgRect.left;
+    const y2 = rect2.top + rect2.height/2 - svgRect.top;
 
-    const x1 = rect1.left + rect1.width / 2 - svgRect.left;
-    const y1 = rect1.top + rect1.height / 2 - svgRect.top;
-    const x2 = rect2.left + rect2.width / 2 - svgRect.left;
-    const y2 = rect2.top + rect2.height / 2 - svgRect.top;
+    // Se estiver usando transform: scale no CSS, as coordenadas internas do SVG 
+    // devem ser relativas ao tamanho original (550px). 
+    // Como estamos usando coordenadas relativas do getBoundingClientRect ENTRE elementos dentro do mesmo contexto escalado,
+    // a matemática funciona nativamente na maioria dos browsers.
 
     const linha = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    linha.setAttribute("x1", x1);
-    linha.setAttribute("y1", y1);
-    linha.setAttribute("x2", x2);
-    linha.setAttribute("y2", y2);
+    // Vamos usar as posições absolutas baseadas no estilo 'left' e 'top' para garantir precisão
+    // independentemente do zoom/scale da tela, pois elas são relativas ao container 550x550
+    linha.setAttribute("x1", parseFloat(square1.style.left));
+    linha.setAttribute("y1", parseFloat(square1.style.top));
+    linha.setAttribute("x2", parseFloat(square2.style.left));
+    linha.setAttribute("y2", parseFloat(square2.style.top));
+
     linha.setAttribute("stroke", "black");
     linha.setAttribute("stroke-width", "5");
     linha.setAttribute("data-pares", `${char1},${char2}`);
@@ -147,7 +157,9 @@ function desenharLinha(char1, char2) {
     linha.style.cursor = "pointer";
     linha.style.pointerEvents = "stroke";
 
-    linha.addEventListener("click", (e) => {
+    // Evento de DELETE (Funciona com Click e Touch simulado)
+    const deletarLinha = (e) => {
+        e.preventDefault();
         e.stopPropagation();
 
         delete conexoes[char1];
@@ -159,8 +171,6 @@ function desenharLinha(char1, char2) {
             ligacoes.splice(index, 1);
         }
 
-        // CORREÇÃO: Remover classe E limpar estilo inline background
-        // Isso garante que a cor volte ao verde original (definido no CSS)
         square1.classList.remove('connected');
         square1.style.backgroundColor = "";
         
@@ -169,7 +179,10 @@ function desenharLinha(char1, char2) {
 
         atualizarDicionario();
         linha.remove();
-    });
+    };
+
+    linha.addEventListener("click", deletarLinha);
+    linha.addEventListener("touchend", deletarLinha);
     
     linha.addEventListener('mouseover', () => { linha.setAttribute("stroke", "#ba5c12"); });
     linha.addEventListener('mouseout', () => { linha.setAttribute("stroke", "#474a2c"); });
@@ -193,52 +206,97 @@ chars.forEach((char, i) => {
     square.className = 'square';
     square.textContent = char === ' ' ? '␣' : char;
     square.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+    
+    // Usamos left/top para posicionamento absoluto dentro do container relativo
+    // Isso ajuda a desenhar as linhas SVG com precisão
+    square.style.left = (275 + x) + 'px'; 
+    square.style.top = (275 + y) + 'px';
+    square.style.transform = "translate(-50%, -50%)"; // Centraliza no ponto exato
+
     square.dataset.char = char;
 
-    square.addEventListener('mousedown', (e) => {
+    // --- LOGICA DE EVENTOS (MOUSE + TOUCH) ---
+
+    // Função unificada para INICIAR conexão
+    const iniciarArrasto = (e) => {
         if (conexoes[char]) return; 
+        e.preventDefault(); // Previne scroll no mobile
         dragging = char;
         square.style.backgroundColor = "var(--burnt-orange)";
-        e.stopPropagation();
-    });
+    };
 
-    square.addEventListener('mouseup', (e) => {
-        if (!dragging || dragging === char || conexoes[char]) return;
-        if (conexoes[dragging]) return;
+    // Função unificada para FINALIZAR conexão
+    const finalizarArrasto = (e) => {
+        if (!dragging) return;
 
-        conexoes[dragging] = char;
-        conexoes[char] = dragging;
-        ligacoes.push([dragging, char]);
+        let targetChar = char; // Padrão para mouse (soltou em cima deste elemento)
+        let targetElement = square;
 
-        desenharLinha(dragging, char);
-        
-        // CORREÇÃO: Limpa o background inline do elemento que foi arrastado
-        // E deixa apenas a classe controlar a cor
-        const dragSquare = [...document.querySelectorAll('.square')].find(sq => sq.dataset.char === dragging);
-        if(dragSquare) {
-            dragSquare.classList.add('connected');
-            dragSquare.style.backgroundColor = ""; // Remove o estilo do 'mousedown'
+        // Se for TOUCH, precisamos descobrir onde o dedo soltou
+        if (e.changedTouches) {
+            const touch = e.changedTouches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('square')) {
+                targetChar = element.dataset.char;
+                targetElement = element;
+            } else {
+                // Soltou fora de qualquer letra
+                resetDrag();
+                return;
+            }
+        }
+
+        // Lógica de Conexão
+        if (dragging !== targetChar && !conexoes[targetChar] && !conexoes[dragging]) {
+            conexoes[dragging] = targetChar;
+            conexoes[targetChar] = dragging;
+            ligacoes.push([dragging, targetChar]);
+
+            desenharLinha(dragging, targetChar);
+            
+            // Atualiza visuais
+            const originSquare = [...document.querySelectorAll('.square')].find(sq => sq.dataset.char === dragging);
+            if(originSquare) {
+                originSquare.classList.add('connected');
+                originSquare.style.backgroundColor = ""; 
+            }
+            targetElement.classList.add('connected');
+            targetElement.style.backgroundColor = "";
+
+            atualizarDicionario();
+        } else {
+            // Se falhou (soltou no mesmo lugar ou lugar ocupado), reseta a cor
+            resetDrag();
         }
         
-        square.classList.add('connected');
-
-        atualizarDicionario();
         dragging = null;
-        e.stopPropagation();
-    });
+    };
+
+    // Mouse Events
+    square.addEventListener('mousedown', iniciarArrasto);
+    square.addEventListener('mouseup', finalizarArrasto);
+
+    // Touch Events
+    square.addEventListener('touchstart', iniciarArrasto, {passive: false});
+    square.addEventListener('touchend', finalizarArrasto, {passive: false});
+    
+    // Touch Move (apenas previne scroll para permitir arrastar o dedo)
+    square.addEventListener('touchmove', (e) => { e.preventDefault(); }, {passive: false});
 
     container.appendChild(square);
 });
 
-// Listener global para resetar se soltar fora
-document.addEventListener('mouseup', () => {
+function resetDrag() {
     if(dragging) {
-        const dragSquare = [...document.querySelectorAll('.square')].find(sq => sq.dataset.char === dragging);
-        // Se soltou fora e não conectou, remove a cor
-        if(dragSquare && !conexoes[dragging]) {
-            dragSquare.style.backgroundColor = "";
+        const sq = [...document.querySelectorAll('.square')].find(sq => sq.dataset.char === dragging);
+        if(sq && !conexoes[dragging]) {
+            sq.style.backgroundColor = "";
         }
     }
+}
+
+document.addEventListener('mouseup', () => {
+    resetDrag();
     dragging = null;
 });
 
