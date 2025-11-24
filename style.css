@@ -196,7 +196,7 @@ line { pointer-events: stroke; }
         /* CORREÇÃO DE ESCALA: */
         /* (100vw - 60px) garante que sobrará 30px de margem em cada lado */
         /* Isso impede que as letras laterais sejam cortadas */
-        transform: scale(calc((100vw - 60px) / 550));
+        transform: scale(calc((100vw - 120px) / 550));
     }
     
     line { stroke-width: 8 !important; }
