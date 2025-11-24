@@ -11,13 +11,12 @@
 * {
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Previne seleção de texto acidental no celular ao arrastar */
     -webkit-touch-callout: none; 
     -webkit-user-select: none; 
     user-select: none;
 }
 
-/* Permite seleção apenas nos inputs */
+/* Libera seleção de texto nos inputs */
 input, textarea { user-select: text; -webkit-user-select: text; }
 
 body, html {
@@ -28,6 +27,8 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Previne rolagem horizontal indesejada no corpo */
+    overflow-x: hidden; 
 }
 
 .main-content {
@@ -45,6 +46,7 @@ body, html {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
+/* --- PAINEL ESQUERDO (Inputs) --- */
 .painel-esquerdo {
     flex: 1;
     display: flex;
@@ -99,6 +101,7 @@ button:active { transform: scale(0.98); }
 .button-reset { background-color: var(--drab-dark-brown); color: white; padding: 8px 15px; }
 .button-secondary { background-color: var(--dark-moss-green); color: white; padding: 10px; }
 
+/* --- PAINEL DIREITO (Círculo) --- */
 .painel-direito {
     flex: 1;
     display: flex;
@@ -108,6 +111,7 @@ button:active { transform: scale(0.98); }
 }
 
 .circle-wrapper {
+    /* Garante espaço para o círculo original */
     width: 550px; 
     height: 550px;
     display: flex;
@@ -139,11 +143,10 @@ button:active { transform: scale(0.98); }
 
 line { pointer-events: stroke; }
 
-/* --- VERSÃO MOBILE --- */
+/* --- VERSÃO MOBILE (AJUSTES FINAIS) --- */
 @media (max-width: 1000px) {
     body { 
-        align-items: flex-start;
-        padding: 0;
+        align-items: flex-start; /* Permite scroll natural */
         background-color: var(--pale-dogwood);
     }
 
@@ -151,53 +154,52 @@ line { pointer-events: stroke; }
         flex-direction: column;
         width: 100%;
         max-width: 100%;
-        padding: 15px; /* Reduzi o padding geral */
-        padding-top: 25px;
-        gap: 20px;
+        padding: 10px; /* Padding bem pequeno para ganhar espaço */
+        padding-top: 20px;
+        gap: 15px;
         box-shadow: none;
         border-radius: 0;
-        /* IMPORTANTE: Reseta o padding direito do desktop */
-        padding-right: 15px; 
+        padding-right: 10px; /* Resetando padding do desktop */
     }
 
     .painel-esquerdo {
         width: 100%;
-        max-width: 100%;
-        gap: 15px;
+        gap: 10px;
     }
 
-    /* Reduzindo tamanho dos inputs para o celular */
-    .input-rotor {
-        width: 50px; height: 50px; font-size: 20px;
-    }
-    .displayMsg {
-        height: 80px; font-size: 14px;
-    }
-    .button-action { padding: 12px; font-size: 16px; }
+    /* Inputs menores no celular para economizar tela */
+    .input-rotor { width: 45px; height: 45px; font-size: 18px; }
+    .rotores { gap: 10px; }
+    .displayMsg { height: 70px; font-size: 14px; }
+    .button-action { padding: 10px; font-size: 16px; }
 
     .painel-direito {
         width: 100%;
-        overflow: visible; 
-        margin-bottom: 30px;
-        /* Garante centralização */
+        margin-top: 10px;
+        margin-bottom: 20px;
         display: flex;
         justify-content: center;
+        overflow: hidden; /* Corta qualquer excesso lateral invisível */
     }
 
     .circle-wrapper {
         width: 100%;
-        height: auto;
-        aspect-ratio: 1 / 1;
+        height: 320px; /* Altura forçada menor */
         display: flex;
         justify-content: center;
+        align-items: center;
     }
 
     .circle-container {
-        /* CORREÇÃO DE ESCALA: */
-        /* (100vw - 60px) garante que sobrará 30px de margem em cada lado */
-        /* Isso impede que as letras laterais sejam cortadas */
-        transform: scale(calc((100vw - 120px) / 550));
+        /* A SOLUÇÃO DEFINITIVA: */
+        /* Reduz para 55% do tamanho original (aprox 300px). */
+        /* Isso garante que cabe em qualquer celular (>320px width) */
+        transform: scale(0.55);
+        
+        /* Ajuste fino de margem se necessário */
+        margin-left: 0; 
     }
     
+    /* Linhas mais grossas para ver melhor na tela pequena */
     line { stroke-width: 8 !important; }
 }
